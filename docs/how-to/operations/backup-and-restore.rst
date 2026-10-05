@@ -9,6 +9,10 @@ data in an existing deployment. These commands operate on applications in the
 ``openstack`` model. They do not back up virtual machine disks, volumes, or the
 entire cluster.
 
+Use ``sunbeam cluster backup create``, ``sunbeam cluster backup list``, and
+``sunbeam cluster backup restore`` for these operations. The bare
+``sunbeam cluster backup`` command displays help.
+
 Separate procedures for Kubernetes, Juju, deployment access, and sunbeam-clusterd
 are described below.
 
@@ -116,7 +120,7 @@ Create backups of the MySQL and Vault applications:
 
 .. code-block :: text
 
-    sunbeam backup
+    sunbeam cluster backup create
 
 Sunbeam selects a secondary MySQL unit when available and the Vault leader unit.
 Backups run concurrently. The command reports a backup ID and status for each
@@ -139,12 +143,11 @@ List the backup IDs available in the configured S3 storage:
 
 .. code-block :: text
 
-    sunbeam list-backups
+    sunbeam cluster backup list
 
 The command displays the inventory for each application and writes a YAML
 inventory manifest to the path shown in its output. Both manifests contain
-backup metadata, not the backed-up data. They are not inputs to the restore
-command.
+backup metadata, not the backed-up data.
 
 Restore
 ~~~~~~~
@@ -152,15 +155,15 @@ Restore
 Schedule a maintenance window. Restoring MySQL interrupts the related OpenStack
 API services and replaces database contents with the selected backup state.
 
-Restore each application from its latest successful backup:
+Restore each application independently from its latest successful backup:
 
 .. code-block :: text
 
-    sunbeam restore
+    sunbeam cluster backup restore
 
-Review the inventory and confirm the restore. Sunbeam warns before proceeding
-with missing or failed backups. A partial restore can leave inconsistent data
-between services.
+Review the inventory and confirm the restore. Sunbeam asks whether to continue
+after skipping applications with missing or failed backups. A partial restore
+can leave inconsistent data between services.
 
 For each MySQL application, Sunbeam pauses the related API services, scales its
 routers to zero units and MySQL to one unit, and restores the backup. It then
@@ -171,7 +174,7 @@ To restore MySQL to a point in time, specify a UTC timestamp:
 
 .. code-block :: text
 
-    sunbeam restore --restore-to-time "YYYY-MM-DD HH:MM:SS"
+    sunbeam cluster backup restore --restore-to-time "YYYY-MM-DD HH:MM:SS"
 
 This requires a MySQL charm supporting point-in-time recovery and backup data
 covering the requested time. See the `charmed MySQL documentation`_. Vault does
@@ -204,7 +207,7 @@ operations. The default is 1800 seconds. For example:
 
 .. code-block :: text
 
-    sunbeam backup --timeout 3600
+    sunbeam cluster backup create --timeout 3600
 
 The backup and restore commands accept ``--no-prompt`` for unattended use. This
 also accepts prompts to continue after applications have been skipped; check
