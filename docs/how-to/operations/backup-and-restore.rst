@@ -113,6 +113,18 @@ Requirements
 * For Vault restore, retain the unseal keys and root token that were in use when
   the backup was created. See :doc:`/how-to/features/vault`.
 
+List configured targets
+~~~~~~~~~~~~~~~~~~~~~~~
+
+List MySQL and Vault applications configured to use S3 backup storage:
+
+.. code-block :: text
+
+    sunbeam cluster backup target list
+
+The output shows each application's S3 relation and backup readiness based on
+its application status.
+
 Backup
 ~~~~~~
 
